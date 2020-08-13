@@ -1,10 +1,10 @@
 ;;; xwidgets-reuse.el --- Allows an xwidgets session and buffer to be reused for browsing which reduces resource consumption. -*- lexical-binding: t -*-
 
-;; Author: Boris Glavic
-;; Maintainer: Boris Glavic
-;; Version: 20200812
+;; Author: Boris Glavic <lordpretzel@gmail.com>
+;; Maintainer: Boris Glavic <lordpretzel@gmail.com>
+;; Version: 0.1
 ;; Package-Requires: ((emacs "26.1"))
-;; Homepage: homepage
+;; Homepage: https://github.com/lordpretzel/xwidgets-reuse
 ;; Keywords: xwidgets, browsing, web
 
 
