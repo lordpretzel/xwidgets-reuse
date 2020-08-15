@@ -26,7 +26,16 @@
 
 ;;; Commentary:
 
-;; Xwidget sessions are relatively heavy-weight. This packages allows a single xwidgets session to be reused for browsing. This can be useful for tasks like viewing html email in xwidgets or elfeed feeds or dash documentation.
+;; Xwidget sessions are relatively heavy-weight.  This packages allows a single
+;; xwidgets session to be reused for browsing.  This can be useful for tasks
+;; like viewing html email in xwidgets or elfeed feeds or dash documentation.  To
+;; customize behavior, you can register minor modes with `xwidgets-reuse' that
+;; bind custom keys.  Call `xwidgets-reuse/register-minor-mode` to register your
+;; minor mode.  Use `xwidgets-reuse/xwidget-reuse-browse-url(url &optional
+;; use-minor-mode)` to browse `url' reusing an xwidget session.  This turns off
+;; all minor modes registered with `xwidgets-reuse' in the reused xwidgets
+;; session.  If `use-minor-mode' is provided, then this minor mode is turned on
+;; in the xwidgets session.
 
 ;;; Code:
 
@@ -49,7 +58,6 @@
 
 ;; ********************************************************************************
 ;; functions
-;; Turn of all specialization minor modes for xwidgets.
 (defun xwidgets-reuse/turn-off-all-xwidgets-specialization-minor-modes ()
   "Turn of all specialization minor modes for xwidgets."
   (with-current-buffer (current-buffer)
@@ -61,7 +69,6 @@
     )
   )
 
-;; register a new specialization mode
 ;;;###autoload
 (defun xwidgets-reuse/register-minor-mode (minor-mode)
   "Registers a `MINOR-MODE' with xwidgets-reuse.  This minor mode will automatically be turned off when another minor mode from `xwidgets-reuse--xwidgets-specialization-minor-modes' is used through `xwidgets-reuse/xwidget-reuse-browse-url'."
@@ -71,7 +78,6 @@
       )
   )
 
-;; open url in xwidgets use existing buffer (also deactivate all minor modes that set keys for specific uses of xwidgets
 ;;;###autoload
 (defun xwidgets-reuse/xwidget-reuse-browse-url (url &optional use-minor-mode)
   "Open `URL' using xwidgets, reusing an existing xwdiget buffer if possible."
@@ -95,7 +101,6 @@
 ;; ********************************************************************************
 ;; utility functions for minor modes to bind if they like to
 
-;; browse external
 ;;;###autoload
 (defun xwidgets-reuse/xwidget-external-browse-current-url ()
   "Browse url shown in current xwidget session in external browser."
