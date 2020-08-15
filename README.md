@@ -35,10 +35,10 @@ Using [use-package](https://github.com/jwiegley/use-package) with [quelpa](https
 
 ~~~elisp
 (use-package
-:quelpa ((xwidgets-reuse
-:fetcher github
-:repo "lordpretzel/xwidgets-reuse")
-:upgrade t)
+  :quelpa ((xwidgets-reuse
+  :fetcher github
+  :repo "lordpretzel/xwidgets-reuse")
+  :upgrade t)
 )
 ~~~
 
@@ -48,7 +48,7 @@ Using [use-package](https://github.com/jwiegley/use-package) with [straight.el](
 
 ~~~elisp
 (use-package xwidgets-reuse
-:straight (xwidgets-reuse :type git :host github :repo "lordpretzel/lordpretzel")
+  :straight (xwidgets-reuse :type git :host github :repo "lordpretzel/xwidgets-reuse"))
 ~~~
 
 ### Source
