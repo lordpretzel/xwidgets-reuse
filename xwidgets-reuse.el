@@ -1,11 +1,11 @@
-;;; xwidgets-reuse.el --- Allows an xwidgets session and buffer to be reused for browsing which reduces resource consumption. -*- lexical-binding: t -*-
+;;; xwidgets-reuse.el --- Reuse xwidgets sessions to reduce resource consumption -*- lexical-binding: t -*-
 
 ;; Author: Boris Glavic <lordpretzel@gmail.com>
 ;; Maintainer: Boris Glavic <lordpretzel@gmail.com>
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "26.1"))
 ;; Homepage: https://github.com/lordpretzel/xwidgets-reuse
-;; Keywords: xwidgets, browsing, web
+;; Keywords: hypermedia
 
 
 ;; This file is not part of GNU Emacs
@@ -30,9 +30,9 @@
 ;; xwidgets session to be reused for browsing.  This can be useful for tasks
 ;; like viewing html email in xwidgets or elfeed feeds or dash documentation.  To
 ;; customize behavior, you can register minor modes with `xwidgets-reuse' that
-;; bind custom keys.  Call `xwidgets-reuse/register-minor-mode` to register your
-;; minor mode.  Use `xwidgets-reuse/xwidget-reuse-browse-url(url &optional
-;; use-minor-mode)` to browse `url' reusing an xwidget session.  This turns off
+;; bind custom keys.  Call `xwidgets-reuse-register-minor-mode' to register your
+;; minor mode.  Use `xwidgets-reuse-xwidget-reuse-browse-url(url &optional
+;; use-minor-mode)' to browse `url' reusing an xwidget session.  This turns off
 ;; all minor modes registered with `xwidgets-reuse' in the reused xwidgets
 ;; session.  If `use-minor-mode' is provided, then this minor mode is turned on
 ;; in the xwidgets session.
@@ -48,70 +48,53 @@
   nil
   "List of minor modes applied to specialize xwidgets buffers for a particular use, e.g., reading html email with mu4e.  Since we are reusing a single xwidgets buffer, these minor modes need to be turned on / off when reusing the buffer for a different purpose."
   :group 'xwidgets-reuse
-  :type 'list
-  )
+  :type 'list)
 
 (defvar xwidgets-reuse--xwidgets-specialization-minor-modes
   xwidgets-reuse-xwidgets-default-specialization-minor-modes
-  "Current list of specialization minor modes.  Allows for runtime registration of new modes."
-   )
+  "Current list of specialization minor modes.  Allows for runtime registration of new modes.")
 
 ;; ********************************************************************************
 ;; functions
-(defun xwidgets-reuse/turn-off-all-xwidgets-specialization-minor-modes ()
+(defun xwidgets-reuse-turn-off-all-xwidgets-specialization-minor-modes ()
   "Turn of all specialization minor modes for xwidgets."
   (with-current-buffer (current-buffer)
     (when (memq major-mode '(xwidget-webkit-mode))
       (dolist (mmode xwidgets-reuse--xwidgets-specialization-minor-modes)
-        (funcall mmode -1)
-        )
-      )
-    )
-  )
+        (funcall mmode -1)))))
 
 ;;;###autoload
-(defun xwidgets-reuse/register-minor-mode (minor-mode)
-  "Registers a `MINOR-MODE' with xwidgets-reuse.  This minor mode will automatically be turned off when another minor mode from `xwidgets-reuse--xwidgets-specialization-minor-modes' is used through `xwidgets-reuse/xwidget-reuse-browse-url'."
+(defun xwidgets-reuse-register-minor-mode (minor-mode)
+  "Registers a `MINOR-MODE' with xwidgets-reuse.  This minor mode will automatically be turned off when another minor mode from `xwidgets-reuse--xwidgets-specialization-minor-modes' is used through `xwidgets-reuse-xwidget-reuse-browse-url'."
   (if (boundp minor-mode)
       (add-to-list 'xwidgets-reuse--xwidgets-specialization-minor-modes minor-mode)
-    (error "`MINOR-MODE' needs to be a function corresponding to a minor mode")
-      )
-  )
+    (error "`MINOR-MODE' needs to be a function corresponding to a minor mode")))
 
 ;;;###autoload
-(defun xwidgets-reuse/xwidget-reuse-browse-url (url &optional use-minor-mode)
+(defun xwidgets-reuse-xwidget-reuse-browse-url (url &optional use-minor-mode)
   "Open `URL' using xwidgets, reusing an existing xwdiget buffer if possible."
   (interactive "sURL to browse in xwidgets: ")
   (let ((buf (car (seq-filter (lambda (x) (string-match "*xwidget webkit:" (buffer-name x))) (buffer-list)))))
     (if buf
         (progn (message "have xwidget buffer %s, use it!" (buffer-name buf))
                (switch-to-buffer buf)
-               (xwidget-webkit-goto-url url)
-               )
+               (xwidget-webkit-goto-url url))
       (progn (xwidget-webkit-browse-url url)
-             (message "don't have xwidget buffer: create one")
-             )
-      )
-    (xwidgets-reuse/turn-off-all-xwidgets-specialization-minor-modes)
+             (message "don't have xwidget buffer: create one")))
+    (xwidgets-reuse-turn-off-all-xwidgets-specialization-minor-modes)
     (when use-minor-mode
-      (funcall use-minor-mode 1))
-      )
-    )
+      (funcall use-minor-mode 1))))
 
 ;; ********************************************************************************
 ;; utility functions for minor modes to bind if they like to
 
 ;;;###autoload
-(defun xwidgets-reuse/xwidget-external-browse-current-url ()
+(defun xwidgets-reuse-xwidget-external-browse-current-url ()
   "Browse url shown in current xwidget session in external browser."
   (interactive)
   (when (memq major-mode '(xwidget-webkit-mode))
-    (let* ((urlstr (xwidget-webkit-current-url))
-           )
-      (browse-url urlstr)
-      )
-    )
-  )
+    (let* ((urlstr (xwidget-webkit-current-url)))
+      (browse-url urlstr))))
 
 (provide 'xwidgets-reuse)
 ;;; xwidgets-reuse.el ends here

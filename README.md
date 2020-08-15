@@ -3,16 +3,14 @@
 <!-- [![MELPA Stable](http://stable.melpa.org/packages/xwidgets-reuse-badge.svg)](http://stable.melpa.org/#/xwidgets-reuse) -->
 <!-- [![MELPA](http://melpa.org/packages/xwidgets-reuse-badge.svg)](http://melpa.org/#/xwidgets-reuse) -->
 
-
-
 # xwidgets-reuse
 
 Enables convenient reuse of xwidgets sessions for multiple purposes (less resource consumption). Since we may want multiple key bindings deepening on the purpose, e.g., viewing articles in `elfeed`, the package maintains a list of minor modes that will be deactivated when a session is reused for a different purpose.
 
 ## Usage
 
-- call `xwidgets-reuse/xwidget-reuse-browse-url(URL &optional use-minor-mode)` to browse a `URL` in xwidgets reusing an existing session if it exists. If `use-minor-mode` is given, it should be a minor mode that is activated in the xwidgets buffer (presumably binding keys for the specific purpose).
-- `xwidgets-reuse/register-minor-mode(minor-mode)` - Registers minor mode `minor-mode` with `xwidgets-reuse`.  This minor mode will automatically be turned off when another minor mode from `xwidgets-reuse--xwidgets-specialization-minor-modes` is used through ‘xwidgets-reuse/xwidget-reuse-browse-url’.
+- call `xwidgets-reuse-xwidget-reuse-browse-url(URL &optional use-minor-mode)` to browse a `URL` in xwidgets reusing an existing session if it exists. If `use-minor-mode` is given, it should be a minor mode that is activated in the xwidgets buffer (presumably binding keys for the specific purpose).
+- `xwidgets-reuse-register-minor-mode(minor-mode)` - Registers minor mode `minor-mode` with `xwidgets-reuse`.  This minor mode will automatically be turned off when another minor mode from `xwidgets-reuse--xwidgets-specialization-minor-modes` is used through ‘xwidgets-reuse-xwidget-reuse-browse-url’.
 
 ### Example
 
@@ -29,7 +27,7 @@ As an example, this is how you can setup elfeed to use xwidgets to view feeds. U
   :global nil)
 
 ;; register minor mode with xwidgets-reuse to turn it on or off
-(xwidgets-reuse/register-minor-mode 'lordpretzel-elfeed-xwidgets-mode)
+(xwidgets-reuse-register-minor-mode 'lordpretzel-elfeed-xwidgets-mode)
 
 (defun lordpretzel/elfeed-search-window-only ()
   "Show only the search window of elfeed."
