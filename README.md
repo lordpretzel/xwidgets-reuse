@@ -36,8 +36,8 @@ Using [use-package](https://github.com/jwiegley/use-package) with [quelpa](https
 ~~~elisp
 (use-package
   :quelpa ((xwidgets-reuse
-  :fetcher github
-  :repo "lordpretzel/xwidgets-reuse")
+    :fetcher github
+    :repo "lordpretzel/xwidgets-reuse")
   :upgrade t)
 )
 ~~~
