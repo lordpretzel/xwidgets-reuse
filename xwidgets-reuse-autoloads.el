@@ -17,6 +17,7 @@ Registers a `MINOR-MODE' with xwidgets-reuse.  This minor mode will automaticall
 
 (autoload 'xwidgets-reuse-xwidget-reuse-browse-url "flycheck_xwidgets-reuse" "\
 Open `URL' using xwidgets, reusing an existing xwdiget buffer if possible.
+Optional argument USE-MINOR-MODE is a minor mode to be activated in the xwidgets session (e.g., for custom keybindinds).
 
 \(fn URL &optional USE-MINOR-MODE)" t nil)
 
@@ -38,6 +39,7 @@ Registers a `MINOR-MODE' with xwidgets-reuse.  This minor mode will automaticall
 
 (autoload 'xwidgets-reuse-xwidget-reuse-browse-url "xwidgets-reuse" "\
 Open `URL' using xwidgets, reusing an existing xwdiget buffer if possible.
+Optional argument USE-MINOR-MODE is a minor mode to be activated in the xwidgets session (e.g., for custom keybindinds).
 
 \(fn URL &optional USE-MINOR-MODE)" t nil)
 

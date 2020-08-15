@@ -72,7 +72,8 @@
 
 ;;;###autoload
 (defun xwidgets-reuse-xwidget-reuse-browse-url (url &optional use-minor-mode)
-  "Open `URL' using xwidgets, reusing an existing xwdiget buffer if possible."
+  "Open `URL' using xwidgets, reusing an existing xwdiget buffer if possible.
+Optional argument USE-MINOR-MODE is a minor mode to be activated in the xwidgets session (e.g., for custom keybindinds)."
   (interactive "sURL to browse in xwidgets: ")
   (let ((buf (car (seq-filter (lambda (x) (string-match "*xwidget webkit:" (buffer-name x))) (buffer-list)))))
     (if buf
