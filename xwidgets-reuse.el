@@ -77,11 +77,13 @@ Optional argument USE-MINOR-MODE is a minor mode to be activated in the xwidgets
   (interactive "sURL to browse in xwidgets: ")
   (let ((buf (car (seq-filter (lambda (x) (string-match "*xwidget webkit:" (buffer-name x))) (buffer-list)))))
     (if buf
-        (progn (message "have xwidget buffer %s, use it!" (buffer-name buf))
-               (switch-to-buffer buf)
+        (progn ;;(message "have xwidget buffer %s, use it!" (buffer-name buf))
+               (unless (eq (window-buffer) buf)
+                 (switch-to-buffer buf))
                (xwidget-webkit-goto-url url))
       (progn (xwidget-webkit-browse-url url)
-             (message "don't have xwidget buffer: create one")))
+             ;;(message "don't have xwidget buffer: create one")
+             ))
     (xwidgets-reuse-turn-off-all-xwidgets-specialization-minor-modes)
     (when use-minor-mode
       (funcall use-minor-mode 1))))
