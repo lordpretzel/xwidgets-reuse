@@ -2,7 +2,7 @@
 
 ;; Author: Boris Glavic <lordpretzel@gmail.com>
 ;; Maintainer: Boris Glavic <lordpretzel@gmail.com>
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "26.1"))
 ;; Homepage: https://github.com/lordpretzel/xwidgets-reuse
 ;; Keywords: hypermedia
@@ -85,13 +85,10 @@ in the xwidgets session (e.g., for custom keybindings)."
   (interactive "sURL to browse in xwidgets: ")
   (let ((buf (car (seq-filter (lambda (x) (string-match "*xwidget webkit:" (buffer-name x))) (buffer-list)))))
     (if buf
-        (progn ;;(message "have xwidget buffer %s, use it!" (buffer-name buf))
-               (unless (eq (window-buffer) buf)
+        (progn (unless (eq (window-buffer) buf)
                  (switch-to-buffer buf))
                (xwidget-webkit-goto-url url))
-      (progn (xwidget-webkit-browse-url url)
-             ;;(message "don't have xwidget buffer: create one")
-             ))
+      (xwidget-webkit-browse-url url))
     (xwidgets-reuse-turn-off-all-xwidgets-specialization-minor-modes)
     (when use-minor-mode
       (funcall use-minor-mode 1))))
