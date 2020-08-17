@@ -1,7 +1,7 @@
 [![License: GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.txt) [![Build Status](https://secure.travis-ci.org/lordpretzel/xwidgets-reuse.png)](http://travis-ci.org/lordpretzel/xwidgets-reuse)
-<!-- [![GitHub release](https://img.shields.io/github/release/lordpretzel/xwidgets-reuse.svg?maxAge=86400)](https://github.com/lordpretzel/xwidgets-reuse/releases) -->
-<!-- [![MELPA Stable](http://stable.melpa.org/packages/xwidgets-reuse-badge.svg)](http://stable.melpa.org/#/xwidgets-reuse) -->
-<!-- [![MELPA](http://melpa.org/packages/xwidgets-reuse-badge.svg)](http://melpa.org/#/xwidgets-reuse) -->
+[![GitHub release](https://img.shields.io/github/release/lordpretzel/xwidgets-reuse.svg?maxAge=86400)](https://github.com/lordpretzel/xwidgets-reuse/releases)
+[![MELPA Stable](http://stable.melpa.org/packages/xwidgets-reuse-badge.svg)](http://stable.melpa.org/#/xwidgets-reuse)
+[![MELPA](http://melpa.org/packages/xwidgets-reuse-badge.svg)](http://melpa.org/#/xwidgets-reuse)
 
 # xwidgets-reuse
 
@@ -17,10 +17,10 @@ Enables convenient reuse of xwidgets sessions for multiple purposes (less resour
 As an example, this is how you can setup elfeed to use xwidgets to view feeds. Using the minor mode `lordpretzel-elfeed-xwidgets-mode`, pressing `q` in the xwidget window returns to the elfeed search window. Note how this minor mode is registered with `xwidget-reuse` to ensure that it will be turned off if the xwidget session is reused for a different purpose.
 
 ~~~elisp
-(define-minor-mode lordpretzel-elfeed-xwidgets-mode 
-  "Minor mode for setting up keys when viewing elfeed entry in xwidgets." 
-  :init-value nil 
-  :lighter "elfeed-browsing" 
+(define-minor-mode lordpretzel-elfeed-xwidgets-mode
+  "Minor mode for setting up keys when viewing elfeed entry in xwidgets."
+  :init-value nil
+  :lighter "elfeed-browsing"
   :keymap
   `((,(kbd "q")
      . lordpretzel/elfeed-search-window-only))
@@ -67,18 +67,15 @@ As an example, this is how you can setup elfeed to use xwidgets to view feeds. U
 
 ## Installation
 
-<!-- ### MELPA -->
+### MELPA
 
-<!-- Symbol’s value as variable is void: $1 is available from MELPA (both -->
-<!-- [stable](http://stable.melpa.org/#/xwidgets-reuse) and -->
-<!-- [unstable](http://melpa.org/#/xwidgets-reuse)).  Assuming your -->
-<!-- ((melpa . https://melpa.org/packages/) (gnu . http://elpa.gnu.org/packages/) (org . http://orgmode.org/elpa/)) lists MELPA, just type -->
+`xwidgets-webkit` is available from MELPA (both [stable](http://stable.melpa.org/#/xwidgets-reuse) and [unstable](http://melpa.org/#/xwidgets-reuse)).  Assuming your `package-archives` lists MELPA, just type
 
-<!-- ~~~sh -->
-<!-- M-x package-install RET xwidgets-reuse RET -->
-<!-- ~~~ -->
+~~~sh
+M-x package-install RET xwidgets-reuse RET
+~~~
 
-<!-- to install it. -->
+to install it.
 
 ### Quelpa
 
