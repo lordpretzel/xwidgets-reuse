@@ -1,5 +1,4 @@
 [![License: GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.txt) [![Build Status](https://secure.travis-ci.org/lordpretzel/xwidgets-reuse.png)](http://travis-ci.org/lordpretzel/xwidgets-reuse)
-[![GitHub release](https://img.shields.io/github/release/lordpretzel/xwidgets-reuse.svg?maxAge=86400)](https://github.com/lordpretzel/xwidgets-reuse/releases)
 [![MELPA Stable](http://stable.melpa.org/packages/xwidgets-reuse-badge.svg)](http://stable.melpa.org/#/xwidgets-reuse)
 [![MELPA](http://melpa.org/packages/xwidgets-reuse-badge.svg)](http://melpa.org/#/xwidgets-reuse)
 

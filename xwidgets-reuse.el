@@ -51,12 +51,18 @@ For example, such a purpose could be reading html email with mu4e.  Since we are
 reusing a single xwidgets buffer, these minor modes need to be turned on / off
 when reusing the buffer for a different purpose."
   :group 'xwidgets-reuse
-  :type 'list)
+  :type '(list symbol))
 
 (defvar xwidgets-reuse--xwidgets-specialization-minor-modes
   xwidgets-reuse-xwidgets-default-specialization-minor-modes
   "Current list of specialization minor modes.
 Allows for runtime registration of new modes.")
+
+(defvar xwidgets-reuse-named-sessions
+  nil
+  "Alist storing xwidgets sessions that have been assigned names.
+
+Such sessions can be reused using `xwidget-reuse-named-session-...' functions.")
 
 ;; ********************************************************************************
 ;; functions
@@ -92,6 +98,60 @@ in the xwidgets session (e.g., for custom keybindings)."
     (xwidgets-reuse-turn-off-all-xwidgets-specialization-minor-modes)
     (when use-minor-mode
       (funcall use-minor-mode 1))))
+
+(defun xwidets-reuse-xwidget-from-buffer (buf)
+  "Return xwidget session associated with buffer BUF."
+    (if (buffer-live-p buf)
+      (with-current-buffer xwidget-webkit-last-session-buffer
+        (xwidget-at (point-min)))
+    nil))
+
+;;;###autoload
+(defun xwidgets-reuse-named-session-browse-url (sessionname url &optional switch-to-session reload no-hide)
+  "Browse URL in xwidget session SESSIONNAME.
+
+If no xwidget session with this name exists, then create a new
+one. If SWITCH-TO-SESSION is non-nil, then switch to this session
+in the current window. If RELOAD is non-nil, then force reloading
+the URL even if it is already shown. If NO-HIDE is non-nil, then
+don't hide the session from xwidgets, i.e., after switching to
+the session, xwidgets considers this to be the previous session
+which is required for, e.g., browsing to a new url to work.
+However, the disadvantage of not hidding is that calls to
+functions like `xwidget-browse-url' will target this session
+which may not be what you want from a dedicated named session."
+  (interactive "sSessionName: \nsURL to browse in xwidgets: ")
+  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal))
+        previous-session)
+    (unless session
+      (setq session (xwidget-webkit--create-new-session-buffer url))
+      (add-to-list 'xwidgets-reuse-named-sessions (cons sessionname session)))
+
+    (setq previous-session xwidget-webkit-last-session-buffer)
+    (with-current-buffer session
+      (setq xwidget-webkit-last-session-buffer session)
+      (when (or reload (not (string-equal url (xwidget-webkit-uri (xwidget-webkit-current-session)))))
+        (xwidget-webkit-goto-uri (xwidets-reuse-xwidget-from-buffer session) url)))
+    ;; if we switch to session, then use this as last session, otherwise hide our session use from xwidget
+    (when switch-to-session
+      (switch-to-buffer (xwidget-buffer (xwidget-webkit-current-session))))
+    (when (and switch-to-session no-hide)
+      (setq xwidget-webkit-last-session-buffer previous-session))))
+
+(defun xwidget-reuse-named-session-switch-to (sessionname)
+  "Switch to named xwidget session SESSIONNAME."
+  (interactive "sSession name:")
+  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal)))
+    (when session
+      (switch-to-buffer session))))
+
+;;;###autoload
+(defun xwidgets-reuse-named-session-close (sessionname)
+  "Close a named xwidget session SESSIONNAME."
+  (interactive "sClose ssession: ")
+  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal)))
+    (when session
+      (kill-buffer session))))
 
 ;; ********************************************************************************
 ;; utility functions for minor modes to bind if they like to
