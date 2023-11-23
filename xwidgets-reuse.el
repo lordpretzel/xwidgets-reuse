@@ -41,6 +41,7 @@
 
 (require 'seq)
 (require 'xwidget)
+(require 'cl-macs)
 
 ;; ********************************************************************************
 ;; customizations and defvars
@@ -107,7 +108,7 @@ in the xwidgets session (e.g., for custom keybindings)."
     nil))
 
 ;;;###autoload
-(defun xwidgets-reuse-named-session-browse-url (sessionname url &optional switch-to-session reload no-hide)
+(cl-defun xwidgets-reuse-named-session-browse-url (sessionname &key url switch-to-session reload no-hide use-minor-mode window focus-window)
   "Browse URL in xwidget session SESSIONNAME.
 
 If no xwidget session with this name exists, then create a new
@@ -119,9 +120,13 @@ the session, xwidgets considers this to be the previous session
 which is required for, e.g., browsing to a new url to work.
 However, the disadvantage of not hidding is that calls to
 functions like `xwidget-browse-url' will target this session
-which may not be what you want from a dedicated named session."
+which may not be what you want from a dedicated named session. If
+USE-MINOR-MODE is provided then turn on this minor
+mode (typically used for defining key-bindings). If WINDOW is
+non-nil, then show the xwidget session in this window."
   (interactive "sSessionName: \nsURL to browse in xwidgets: ")
   (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal))
+        (curwin (selected-window))
         previous-session)
     (unless session
       (setq session (xwidget-webkit--create-new-session-buffer url))
@@ -130,26 +135,40 @@ which may not be what you want from a dedicated named session."
     (setq previous-session xwidget-webkit-last-session-buffer)
     (with-current-buffer session
       (setq xwidget-webkit-last-session-buffer session)
-      (when (or reload (not (string-equal url (xwidget-webkit-uri (xwidget-webkit-current-session)))))
-        (xwidget-webkit-goto-uri (xwidets-reuse-xwidget-from-buffer session) url)))
-    ;; if we switch to session, then use this as last session, otherwise hide our session use from xwidget
+      (when (and url (or reload (not (string-equal url (xwidget-webkit-uri (xwidget-webkit-current-session))))))
+        (xwidget-webkit-goto-uri (xwidets-reuse-xwidget-from-buffer session) url))
+      (when use-minor-mode
+        (funcall use-minor-mode 1)))
+    ;; if we switch to session, then use this as last session, otherwise hide our session use from xwidget. Optionally show in user provided window.
     (when switch-to-session
-      (switch-to-buffer (xwidget-buffer (xwidget-webkit-current-session))))
+      (when window
+        (select-window window))
+      (switch-to-buffer (xwidget-buffer (xwidget-webkit-current-session)))
+      (when (and window (not focus-window))
+        (select-window curwin)))
     (when (and switch-to-session no-hide)
       (setq xwidget-webkit-last-session-buffer previous-session))))
 
-(defun xwidget-reuse-named-session-switch-to (sessionname)
-  "Switch to named xwidget session SESSIONNAME."
+(cl-defun xwidget-reuse-named-session-switch-to (sessionname &key hide)
+  "Switch to named xwidget session SESSIONNAME.
+
+If HIDE is non-nil then hide this session from xwidgets."
   (interactive "sSession name:")
-  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal)))
+  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal))
+        (previous-session xwidget-webkit-last-session-buffer))
     (when session
-      (switch-to-buffer session))))
+      (switch-to-buffer session)
+      (if hide
+          (setq xwidget-webkit-last-session-buffer previous-session)
+        (with-current-buffer session
+          (setq xwidget-webkit-last-session-buffer session))))))
 
 ;;;###autoload
 (defun xwidgets-reuse-named-session-close (sessionname)
   "Close a named xwidget session SESSIONNAME."
-  (interactive "sClose ssession: ")
+  (interactive "sClose ssession: ")  
   (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal)))
+    (setq previous-session xwidget-webkit-last-session-buffer)
     (when session
       (kill-buffer session))))
 

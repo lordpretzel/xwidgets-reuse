@@ -75,9 +75,16 @@ Browse URL in xwidget session SESSIONNAME.
 
 If no xwidget session with this name exists, then create a new
 one. If SWITCH-TO-SESSION is non-nil, then switch to this session
-in the current window.
+in the current window. If RELOAD is non-nil, then force reloading
+the URL even if it is already shown. If NO-HIDE is non-nil, then
+don't hide the session from xwidgets, i.e., after switching to
+the session, xwidgets considers this to be the previous session
+which is required for, e.g., browsing to a new url to work.
+However, the disadvantage of not hidding is that calls to
+functions like `xwidget-browse-url' will target this session
+which may not be what you want from a dedicated named session.
 
-(fn SESSIONNAME URL &optional SWITCH-TO-SESSION RELOAD)" t)
+(fn SESSIONNAME &keys URL SWITCH-TO-SESSION RELOAD NO-HIDE USE-MINOR-MODE)" t)
 (autoload 'xwidgets-reuse-named-session-close "xwidgets-reuse" "\
 Close a named xwidget session SESSIONNAME.
 
