@@ -82,9 +82,12 @@ the session, xwidgets considers this to be the previous session
 which is required for, e.g., browsing to a new url to work.
 However, the disadvantage of not hidding is that calls to
 functions like `xwidget-browse-url' will target this session
-which may not be what you want from a dedicated named session.
+which may not be what you want from a dedicated named session. If
+USE-MINOR-MODE is provided then turn on this minor
+mode (typically used for defining key-bindings). If WINDOW is
+non-nil, then show the xwidget session in this window.
 
-(fn SESSIONNAME &keys URL SWITCH-TO-SESSION RELOAD NO-HIDE USE-MINOR-MODE)" t)
+(fn SESSIONNAME &key URL SWITCH-TO-SESSION RELOAD NO-HIDE USE-MINOR-MODE WINDOW FOCUS-WINDOW)" t)
 (autoload 'xwidgets-reuse-named-session-close "xwidgets-reuse" "\
 Close a named xwidget session SESSIONNAME.
 

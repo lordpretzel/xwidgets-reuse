@@ -100,6 +100,12 @@ in the xwidgets session (e.g., for custom keybindings)."
     (when use-minor-mode
       (funcall use-minor-mode 1))))
 
+(defun xwidgets-reuse-kill-all-sessions (&optional sessionnames)
+  "Kill all named xwidgets sessions handeled by xwidgets-reuse."
+  (interactive)
+  (mapc #'xwidgets-reuse-named-session-close
+      (mapcar 'car (or sessionnames xwidgets-reuse-named-sessions))))
+
 (defun xwidets-reuse-xwidget-from-buffer (buf)
   "Return xwidget session associated with buffer BUF."
     (if (buffer-live-p buf)
@@ -168,9 +174,9 @@ If HIDE is non-nil then hide this session from xwidgets."
   "Close a named xwidget session SESSIONNAME."
   (interactive "sClose ssession: ")  
   (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal)))
-    (setq previous-session xwidget-webkit-last-session-buffer)
     (when session
-      (kill-buffer session))))
+      (kill-buffer session)
+      (setq xwidgets-reuse-named-sessions (assoc-delete-all sessionname xwidgets-reuse-named-sessions)))))
 
 ;; ********************************************************************************
 ;; utility functions for minor modes to bind if they like to
