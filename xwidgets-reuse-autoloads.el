@@ -88,13 +88,19 @@ mode (typically used for defining key-bindings). If WINDOW is
 non-nil, then show the xwidget session in this window.
 
 (fn SESSIONNAME &key URL SWITCH-TO-SESSION RELOAD NO-HIDE USE-MINOR-MODE WINDOW FOCUS-WINDOW)" t)
+(autoload 'xwidget-reuse-named-session-switch-to "xwidgets-reuse" "\
+Switch to named xwidget session SESSIONNAME.
+
+If HIDE is non-nil then hide this session from xwidgets.
+
+(fn SESSIONNAME &key HIDE)" t)
 (autoload 'xwidgets-reuse-named-session-close "xwidgets-reuse" "\
 Close a named xwidget session SESSIONNAME.
 
 (fn SESSIONNAME)" t)
 (autoload 'xwidgets-reuse-xwidget-external-browse-current-url "xwidgets-reuse" "\
 Externally browse url shown in current xwidget session." t)
-(register-definition-prefixes "xwidgets-reuse" '("xwid"))
+(register-definition-prefixes "xwidgets-reuse" '("xwidgets-reuse-"))
 
 
 ;; Local Variables:

@@ -26,16 +26,21 @@
 
 ;;; Commentary:
 
-;; Xwidget sessions are relatively heavy-weight.  This packages allows a single
-;; xwidgets session to be reused for browsing.  This can be useful for tasks
-;; like viewing html email in xwidgets or elfeed feeds or dash documentation.  To
+;; Xwidget sessions are relatively heavy-weight. This packages allows a single
+;; xwidgets session to be reused for browsing. This can be useful for tasks like
+;; viewing html email in xwidgets or elfeed feeds or dash documentation. To
 ;; customize behavior, you can register minor modes with `xwidgets-reuse' that
-;; bind custom keys.  Call `xwidgets-reuse-register-minor-mode' to register your
-;; minor mode.  Use `xwidgets-reuse-xwidget-reuse-browse-url(url &optional
-;; use-minor-mode)' to browse `url' reusing an xwidget session.  This turns off
+;; bind custom keys. Call `xwidgets-reuse-register-minor-mode' to register your
+;; minor mode. Use `xwidgets-reuse-xwidget-reuse-browse-url(url &optional
+;; use-minor-mode)' to browse `url' reusing an xwidget session. This turns off
 ;; all minor modes registered with `xwidgets-reuse' in the reused xwidgets
-;; session.  If `use-minor-mode' is provided, then this minor mode is turned on
-;; in the xwidgets session.
+;; session. If `use-minor-mode' is provided, then this minor mode is turned on
+;; in the xwidgets session. Furthermore, this package allows the creation and
+;; management of named sessions. A named session is a session that once created,
+;; can be accessed and reused by its name. xwidgets-reuse also supports
+;; automatic cleanup of named sessions to save resources. It runs a timer and
+;; automatically closes sessions that are registered for cleanup if they are
+;; currently not shown in a visible window.
 
 ;;; Code:
 
@@ -66,6 +71,16 @@ Allows for runtime registration of new modes.")
 Such sessions can be reused using `xwidget-reuse-named-session-...' functions.")
 
 ;; ********************************************************************************
+;; data types
+(cl-defstruct (xwidgets-reuse--session
+               (:constructor xwidgets-reuse--session-create))
+  "Data frame: a dataflow graph whose result is lazily created."
+  (sessionname nil :type string :documentation "Name of the session.")
+  (xwidget nil :documentation "The XWidget session.")
+  (minormode nil :documentation "A minor mode associated with this session.")
+  (autoclose nil :documentation "If non-nil, then this session is automatically closed if not shown in a window."))
+
+;; ********************************************************************************
 ;; functions
 (defun xwidgets-reuse-turn-off-all-xwidgets-specialization-minor-modes ()
   "Turn of all specialization minor modes for xwidgets."
@@ -91,10 +106,11 @@ Optional argument USE-MINOR-MODE is a minor mode to be activated
 in the xwidgets session (e.g., for custom keybindings)."
   (interactive "sURL to browse in xwidgets: ")
   (let ((buf (car (seq-filter (lambda (x) (string-match "*xwidget webkit:" (buffer-name x))) (buffer-list)))))
-    (if buf
-        (progn (unless (eq (window-buffer) buf)
-                 (switch-to-buffer buf))
-               (xwidget-webkit-goto-url url))
+    (if (and buf (buffer-live-p buf))
+        (progn
+          (unless (eq (window-buffer) buf)
+            (switch-to-buffer buf))
+          (xwidget-webkit-goto-url url))
       (xwidget-webkit-browse-url url))
     (xwidgets-reuse-turn-off-all-xwidgets-specialization-minor-modes)
     (when use-minor-mode
@@ -104,17 +120,27 @@ in the xwidgets session (e.g., for custom keybindings)."
   "Kill all named xwidgets sessions handeled by xwidgets-reuse."
   (interactive)
   (mapc #'xwidgets-reuse-named-session-close
-      (mapcar 'car (or sessionnames xwidgets-reuse-named-sessions))))
+      (or sessionnames (mapcar 'car xwidgets-reuse-named-sessions))))
 
-(defun xwidets-reuse-xwidget-from-buffer (buf)
+(defun xwidgets-reuse-xwidget-from-buffer (buf)
   "Return xwidget session associated with buffer BUF."
     (if (buffer-live-p buf)
       (with-current-buffer xwidget-webkit-last-session-buffer
         (xwidget-at (point-min)))
     nil))
 
+(defun xwidgets-reuse-session-exists (sessionname)
+  "Return non-nil if session named SESSIONNAME exists."
+  (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal))
+
+(defun xwidgets-reuse--get-session-xwidget (sessionname)
+  "Return xwidget for SESSIONNAME if this session exists, otherwise return nil."
+  (let ((sessiono (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal)))
+    (when sessiono
+        (xwidgets-reuse--session-xwidget sessiono))))
+
 ;;;###autoload
-(cl-defun xwidgets-reuse-named-session-browse-url (sessionname &key url switch-to-session reload no-hide use-minor-mode window focus-window)
+(cl-defun xwidgets-reuse-named-session-browse-url (sessionname &key url switch-to-session reload no-hide use-minor-mode window focus-window autoclose)
   "Browse URL in xwidget session SESSIONNAME.
 
 If no xwidget session with this name exists, then create a new
@@ -129,20 +155,30 @@ functions like `xwidget-browse-url' will target this session
 which may not be what you want from a dedicated named session. If
 USE-MINOR-MODE is provided then turn on this minor
 mode (typically used for defining key-bindings). If WINDOW is
-non-nil, then show the xwidget session in this window."
+non-nil, then show the xwidget session in this window If
+FOCUS-WINDOW is non-nil, then focus the window. If AUTOCLOSE is
+non-nil, then automatically cleanup the session if it is not
+shown in a window. This function returns the buffer for the named
+session."
   (interactive "sSessionName: \nsURL to browse in xwidgets: ")
-  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal))
-        (curwin (selected-window))
-        previous-session)
-    (unless session
+  (let* ((session (xwidgets-reuse--get-session-xwidget sessionname))
+         (curwin (selected-window))
+         previous-session)
+    (unless (and session (buffer-live-p session))
       (setq session (xwidget-webkit--create-new-session-buffer url))
-      (add-to-list 'xwidgets-reuse-named-sessions (cons sessionname session)))
+      (add-to-list 'xwidgets-reuse-named-sessions
+                   (cons sessionname
+                         (xwidgets-reuse--session-create
+                          :sessionname sessionname
+                          :minormode use-minor-mode
+                          :autoclose autoclose
+                          :xwidget session))))
 
     (setq previous-session xwidget-webkit-last-session-buffer)
     (with-current-buffer session
       (setq xwidget-webkit-last-session-buffer session)
       (when (and url (or reload (not (string-equal url (xwidget-webkit-uri (xwidget-webkit-current-session))))))
-        (xwidget-webkit-goto-uri (xwidets-reuse-xwidget-from-buffer session) url))
+        (xwidget-webkit-goto-uri (xwidgets-reuse-xwidget-from-buffer session) url))
       (when use-minor-mode
         (funcall use-minor-mode 1)))
     ;; if we switch to session, then use this as last session, otherwise hide our session use from xwidget. Optionally show in user provided window.
@@ -153,30 +189,52 @@ non-nil, then show the xwidget session in this window."
       (when (and window (not focus-window))
         (select-window curwin)))
     (when (and switch-to-session no-hide)
-      (setq xwidget-webkit-last-session-buffer previous-session))))
+      (setq xwidget-webkit-last-session-buffer previous-session))
+    session))
 
+(cl-defun xwidget-reuse-named-session-bury (sessionname &key remove-url)
+  "Bury the buffer for the named session SESSIONNAME.
+
+If REMOVE-URL is non-nil, then switch to a local url to reduce resource usage of the session."
+  (let ((session (xwidgets-reuse--get-session-xwidget sessionname)))
+    (when session
+      (bury-buffer session)
+      (when remove-url
+        (xwidget-webkit-goto-uri (xwidgets-reuse-xwidget-from-buffer session) "")))))
+
+;;;###autoload
 (cl-defun xwidget-reuse-named-session-switch-to (sessionname &key hide)
   "Switch to named xwidget session SESSIONNAME.
 
-If HIDE is non-nil then hide this session from xwidgets."
+If HIDE is non-nil then hide this session from xwidgets. Return
+the buffer for this session."
   (interactive "sSession name:")
-  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal))
+  (let ((session (xwidgets-reuse--get-session-xwidget sessionname))
         (previous-session xwidget-webkit-last-session-buffer))
     (when session
       (switch-to-buffer session)
       (if hide
           (setq xwidget-webkit-last-session-buffer previous-session)
         (with-current-buffer session
-          (setq xwidget-webkit-last-session-buffer session))))))
+          (setq xwidget-webkit-last-session-buffer session)))
+      session)))
 
 ;;;###autoload
 (defun xwidgets-reuse-named-session-close (sessionname)
-  "Close a named xwidget session SESSIONNAME."
-  (interactive "sClose ssession: ")  
-  (let ((session (alist-get sessionname xwidgets-reuse-named-sessions nil nil 'string-equal)))
+  "Close a named xwidget session SESSIONNAME.
+
+This also kills the associated xwidget and releases window resources."
+  (interactive "sClose ssession: ")
+  (let ((session (xwidgets-reuse--get-session-xwidget sessionname)))
     (when session
-      (kill-buffer session)
-      (setq xwidgets-reuse-named-sessions (assoc-delete-all sessionname xwidgets-reuse-named-sessions)))))
+      (let ((kill-buffer-query-functions nil)
+            (xwidgets (get-buffer-xwidgets (current-buffer))))
+        (dolist (xwidget xwidgets)
+          (kill-xwidget xwidget))
+        (when (buffer-live-p session)
+          (kill-buffer session))
+        (setq xwidgets-reuse-named-sessions
+              (assoc-delete-all sessionname xwidgets-reuse-named-sessions))))))
 
 ;; ********************************************************************************
 ;; utility functions for minor modes to bind if they like to
