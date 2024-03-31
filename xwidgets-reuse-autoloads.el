@@ -85,17 +85,24 @@ functions like `xwidget-browse-url' will target this session
 which may not be what you want from a dedicated named session. If
 USE-MINOR-MODE is provided then turn on this minor
 mode (typically used for defining key-bindings). If WINDOW is
-non-nil, then show the xwidget session in this window.
+non-nil, then show the xwidget session in this window If
+FOCUS-WINDOW is non-nil, then focus the window. If AUTOCLOSE is
+non-nil, then automatically cleanup the session if it is not
+shown in a window. This function returns the buffer for the named
+session.
 
-(fn SESSIONNAME &key URL SWITCH-TO-SESSION RELOAD NO-HIDE USE-MINOR-MODE WINDOW FOCUS-WINDOW)" t)
+(fn SESSIONNAME &key URL SWITCH-TO-SESSION RELOAD NO-HIDE USE-MINOR-MODE WINDOW FOCUS-WINDOW AUTOCLOSE)" t)
 (autoload 'xwidget-reuse-named-session-switch-to "xwidgets-reuse" "\
 Switch to named xwidget session SESSIONNAME.
 
-If HIDE is non-nil then hide this session from xwidgets.
+If HIDE is non-nil then hide this session from xwidgets. Return
+the buffer for this session.
 
 (fn SESSIONNAME &key HIDE)" t)
 (autoload 'xwidgets-reuse-named-session-close "xwidgets-reuse" "\
 Close a named xwidget session SESSIONNAME.
+
+This also kills the associated xwidget and releases window resources.
 
 (fn SESSIONNAME)" t)
 (autoload 'xwidgets-reuse-xwidget-external-browse-current-url "xwidgets-reuse" "\

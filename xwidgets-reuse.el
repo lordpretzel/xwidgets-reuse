@@ -2,7 +2,7 @@
 
 ;; Author: Boris Glavic <lordpretzel@gmail.com>
 ;; Maintainer: Boris Glavic <lordpretzel@gmail.com>
-;; Version: 0.2
+;; Version: 0.3
 ;; Package-Requires: ((emacs "26.1"))
 ;; Homepage: https://github.com/lordpretzel/xwidgets-reuse
 ;; Keywords: hypermedia
@@ -195,7 +195,8 @@ session."
 (cl-defun xwidget-reuse-named-session-bury (sessionname &key remove-url)
   "Bury the buffer for the named session SESSIONNAME.
 
-If REMOVE-URL is non-nil, then switch to a local url to reduce resource usage of the session."
+If REMOVE-URL is non-nil, then switch to a local url to reduce resource
+usage of the session."
   (let ((session (xwidgets-reuse--get-session-xwidget sessionname)))
     (when session
       (bury-buffer session)
